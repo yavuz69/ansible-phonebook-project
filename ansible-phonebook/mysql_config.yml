@@ -1,0 +1,89 @@
+- name: mysql configuration
+  become: true
+  gather_facts: No
+  any_errors_fatal: true
+  hosts: ansible_db_server_yavuz
+  vars_files:
+    - secret.yml
+  vars:
+    hostname: mysql_server
+    db_name: phonebook_db
+    db_table: phonebook
+    db_user: remoteUser
+
+  tasks:
+
+    - name: Install pip
+      package:
+        name: python3-pip
+        state: present
+        update_cache: true 
+
+    - name: set hostname
+      shell: "sudo hostnamectl set-hostname {{ hostname }}"  # hostname atama komutu 
+
+    - name: Installing Mysql  and dependencies
+      ansible.builtin.package:
+        name: "{{ item }}"
+        state: present
+        update_cache: yes
+      loop:
+        - mysql-server
+        - mysql-client
+        - python3-mysqldb
+        - libmysqlclient-dev
+
+    - name: start and enable mysql service
+      ansible.builtin.service:
+        name: mysql
+        state: started
+        enabled: yes
+
+    - name: creating mysql user
+      mysql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        priv: '*.*:ALL'
+        host: '%'
+        state: present
+
+    - name: copy the sql script
+      ansible.builtin.copy:
+        src: /home/yavuz69/ansible-phonebook-project/phonebook/init.sql
+        dest: ~/
+
+    - name: creating phonebook_db
+      mysql_db:
+        name: "{{ db_name }}"
+        state: present
+
+    - name: check if the database has the table
+      shell: |
+        echo "USE {{ db_name }}; show tables like '{{ db_table }}'; " | mysql
+      register: resultOfShowTables
+
+    - name: DEBUG
+      ansible.builtin.debug:
+        var: resultOfShowTables
+
+    - name: Import database table
+      mysql_db:
+        name: "{{ db_name }}"   # This is the database schema name.
+        state: import  # This module is not idempotent when the state property value is import.
+        target: ~/init.sql # This script creates the products table.
+      when: resultOfShowTables.stdout == "" # This line checks if the table is already imported. If so this task doesn't run.
+
+    - name: Enable remote login to mysql
+      ansible.builtin.lineinfile:
+         path: /etc/mysql/mysql.conf.d/mysqld.cnf
+         regexp: '^bind-address'
+         line: 'bind-address = 0.0.0.0'
+         backup: yes
+      notify:
+         - Restart mysql
+
+  handlers:
+    - name: Restart mysql
+      ansible.builtin.service:
+        name: mysql
+        state: restarted

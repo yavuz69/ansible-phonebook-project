@@ -1,0 +1,40 @@
+- name: web server configuration
+  hosts: ansible_web_server_yavuz
+  vars:
+    hostname: web_server
+  tasks:
+    - name: set hostname
+      shell: "sudo hostnamectl set-hostname {{ hostname }}"
+
+    - name: Installing python for python app
+      become: yes
+      ansible.builtin.package:
+        name:
+          - python3
+          - python3-pip
+        state: present
+        update_cache: yes
+
+    - name: copy the app file to the web server
+      ansible.builtin.copy:
+        src: /home/yavuz69/ansible-phonebook-project/phonebook/phonebook-app.py
+        dest: ~/
+
+    - name: copy the requirements file to the web server
+      ansible.builtin.copy:
+        src: /home/yavuz69/ansible-phonebook-project/phonebook/requirements.txt
+        dest: ~/
+
+    - name: copy the templates folder to the web server
+      ansible.builtin.copy:
+        src: /home/yavuz69/ansible-phonebook-project/phonebook/templates
+        dest: ~/
+
+    - name: install dependencies from requirements file
+      become: yes
+      ansible.builtin.pip:
+        requirements: /home/ubuntu/requirements.txt
+
+    - name: run the app
+      become: yes
+      shell: "nohup python3 phonebook-app.py &"

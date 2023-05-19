@@ -1,0 +1,13 @@
+plugin: aws_ec2
+regions:
+  - "us-east-1"
+filters:
+  tag:stack: ansible_project
+keyed_groups:
+  - prefix: "ansible"
+    # separator: ""
+    key: tags.environment
+  - prefix: "ansible"  
+    key: tags.Name
+compose:
+  ansible_host: public_ip_address
