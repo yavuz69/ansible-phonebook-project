@@ -1,6 +1,4 @@
-# Hands-on Ansible-04: Creating directory layout, error handling and controlling execution with starategies in ansible
-
-The purpose of this hands-on training is to give students the knowledge of best parctices in ansible playbooks.
+# Project-Ansible-Phonebook : Web Page Application (Mysql-Nodejs-Flask) deployed on EC2's with Ansible
 
 ## Learning Outcomes
 
