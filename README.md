@@ -1,5 +1,7 @@
 # Project-Ansible-Phonebook : Web Page Application (Mysql-Nodejs-Flask) deployed on EC2's with Ansible
 
+This project aims to create a phonebook application in Python and deploy it as a web application using Flask. Additionally, it involves removing Elastic Compute Cloud (EC2) instances using Terraform and configuring these EC2 instances using Ansible.
+
 ## Learning Outcomes
 
 At the end of this hands-on training, students will be able to;
